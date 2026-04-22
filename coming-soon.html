@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>edicTrade — Coming Soon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0B2838;
+    --navy-deep: #071A24;
+    --navy-mid: #0F3345;
+    --gold: #DBA858;
+    --gold-bright: #E89C31;
+    --gold-pale: #F0C878;
+    --gold-dim: #8B6832;
+    --cream: #F5ECD8;
+    --cream-dim: #BFA878;
+  }
+
+  html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    background: var(--navy-deep);
+    font-family: 'Rajdhani', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    position: relative;
+  }
+
+  /* ── Grid background ── */
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(219,168,88,0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(219,168,88,0.045) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+  }
+
+  /* ── Candle chart decoration ── */
+  .chart-bg {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 200px;
+    opacity: 0.08;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  /* ── Glow orbs ── */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(80px);
+  }
+  .orb-1 {
+    width: 480px; height: 480px;
+    background: radial-gradient(circle, rgba(232,156,49,0.18) 0%, transparent 70%);
+    top: -120px; left: -100px;
+    animation: drift1 18s ease-in-out infinite alternate;
+  }
+  .orb-2 {
+    width: 360px; height: 360px;
+    background: radial-gradient(circle, rgba(219,168,88,0.12) 0%, transparent 70%);
+    bottom: -80px; right: -60px;
+    animation: drift2 22s ease-in-out infinite alternate;
+  }
+  .orb-3 {
+    width: 240px; height: 240px;
+    background: radial-gradient(circle, rgba(11,40,56,0.9) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  @keyframes drift1 {
+    from { transform: translate(0, 0) scale(1); }
+    to   { transform: translate(40px, 30px) scale(1.08); }
+  }
+  @keyframes drift2 {
+    from { transform: translate(0, 0) scale(1); }
+    to   { transform: translate(-30px, -20px) scale(1.05); }
+  }
+
+  /* ── Scan line ── */
+  .scanline {
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(0,0,0,0.03) 3px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ── Main content ── */
+  .stage {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 3rem 2rem;
+    width: min(900px, 96vw);
+    gap: 0;
+  }
+
+  /* ── Logo ── */
+  .logo-wrap {
+    width: min(680px, 88vw);
+    opacity: 0;
+    animation: riseIn 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
+  }
+
+  /* ── Divider ── */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    margin: 2.4rem 0 2.6rem;
+    width: min(500px, 80vw);
+    opacity: 0;
+    animation: riseIn 1s cubic-bezier(0.22, 1, 0.36, 1) 0.9s forwards;
+  }
+  .divider-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  }
+  .divider-diamond {
+    width: 8px; height: 8px;
+    background: var(--gold);
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+
+  /* ── Headline ── */
+  .headline {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-style: italic;
+    font-size: clamp(1.55rem, 4.5vw, 2.9rem);
+    color: var(--cream);
+    letter-spacing: 0.01em;
+    line-height: 1.25;
+    max-width: 680px;
+    opacity: 0;
+    animation: riseIn 1s cubic-bezier(0.22, 1, 0.36, 1) 1.1s forwards;
+  }
+  .headline .accent {
+    color: var(--gold);
+    font-style: normal;
+    font-weight: 400;
+  }
+
+  /* ── Sub message ── */
+  .sub {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 300;
+    font-size: clamp(0.8rem, 1.8vw, 1rem);
+    color: var(--cream-dim);
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    margin-top: 1.8rem;
+    opacity: 0;
+    animation: riseIn 1s cubic-bezier(0.22, 1, 0.36, 1) 1.35s forwards;
+  }
+
+  /* ── Ticker tape ── */
+  .ticker-wrap {
+    margin-top: 3.2rem;
+    width: min(720px, 92vw);
+    overflow: hidden;
+    border-top: 1px solid rgba(219,168,88,0.18);
+    border-bottom: 1px solid rgba(219,168,88,0.18);
+    padding: 0.6rem 0;
+    position: relative;
+    opacity: 0;
+    animation: riseIn 1s ease 1.7s forwards;
+  }
+  .ticker-tape {
+    display: flex;
+    gap: 3rem;
+    white-space: nowrap;
+    animation: ticker 24s linear infinite;
+    will-change: transform;
+  }
+  .ticker-item {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .ticker-item .sym { color: var(--gold); }
+  .ticker-item .val { color: var(--cream-dim); }
+  .ticker-item .chg-up   { color: #4CAF6A; font-size: 0.72rem; }
+  .ticker-item .chg-down { color: #E05A5A; font-size: 0.72rem; }
+
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* ── Domain badge ── */
+  .domain {
+    margin-top: 2.6rem;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.22em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    opacity: 0;
+    animation: riseIn 1s ease 2s forwards;
+  }
+
+  /* ── Corner marks ── */
+  .corner {
+    position: fixed;
+    width: 32px; height: 32px;
+    border-color: rgba(219,168,88,0.3);
+    border-style: solid;
+    pointer-events: none;
+    opacity: 0;
+    animation: riseIn 1.4s ease 0.5s forwards;
+  }
+  .corner-tl { top: 28px; left: 28px; border-width: 1.5px 0 0 1.5px; }
+  .corner-tr { top: 28px; right: 28px; border-width: 1.5px 1.5px 0 0; }
+  .corner-bl { bottom: 28px; left: 28px; border-width: 0 0 1.5px 1.5px; }
+  .corner-br { bottom: 28px; right: 28px; border-width: 0 1.5px 1.5px 0; }
+
+  /* ── Mini data pills ── */
+  .data-row {
+    display: flex;
+    gap: 1.2rem;
+    margin-top: 1.4rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    opacity: 0;
+    animation: riseIn 1s ease 1.55s forwards;
+  }
+  .pill {
+    background: rgba(219,168,88,0.07);
+    border: 1px solid rgba(219,168,88,0.2);
+    border-radius: 3px;
+    padding: 0.28rem 0.9rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    color: var(--cream-dim);
+    text-transform: uppercase;
+    font-weight: 400;
+  }
+
+  @keyframes riseIn {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="scanline"></div>
+
+<!-- Corner marks -->
+<div class="corner corner-tl"></div>
+<div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div>
+<div class="corner corner-br"></div>
+
+<!-- Candlestick BG SVG -->
+<div class="chart-bg">
+  <svg viewBox="0 0 1440 200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+    <polyline points="0,160 60,140 120,150 180,110 240,90 300,100 360,75 420,85 480,60 540,70 600,50 660,65 720,40 780,55 840,35 900,48 960,30 1020,45 1080,25 1140,38 1200,20 1260,30 1320,18 1380,28 1440,15"
+      fill="none" stroke="#DBA858" stroke-width="2"/>
+    <rect x="60"  y="130" width="8" height="40" fill="#4CAF6A"/>
+    <rect x="60"  y="125" width="1.5" height="50" fill="#4CAF6A" transform="translate(3.25,0)"/>
+    <rect x="180" y="100" width="8" height="35" fill="#4CAF6A"/>
+    <rect x="240" y="82"  width="8" height="25" fill="#4CAF6A"/>
+    <rect x="360" y="70"  width="8" height="20" fill="#4CAF6A"/>
+    <rect x="480" y="55"  width="8" height="18" fill="#4CAF6A"/>
+    <rect x="600" y="45"  width="8" height="15" fill="#4CAF6A"/>
+    <rect x="120" y="143" width="8" height="20" fill="#E05A5A"/>
+    <rect x="300" y="95"  width="8" height="18" fill="#E05A5A"/>
+    <rect x="420" y="80"  width="8" height="16" fill="#E05A5A"/>
+    <rect x="540" y="65"  width="8" height="14" fill="#E05A5A"/>
+    <rect x="660" y="58"  width="8" height="14" fill="#E05A5A"/>
+  </svg>
+</div>
+
+<!-- Stage -->
+<div class="stage">
+
+  <!-- SVG Logo inline -->
+  <div class="logo-wrap">
+    <svg viewBox="0 0 1616 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+      <path d="M105.8 149.5C116.208 149.5 124.44 158.377 129.376 167.539C143.329 193.438 186.55 212.312 237.707 212.312C271.079 212.312 301.075 204.28 321.771 191.504C326.037 188.871 330.87 187.188 335.884 187.188C354.141 187.188 363.832 206.454 349.09 217.224C321.521 237.364 281.827 250 237.707 250C163.987 250 102.627 214.723 89.5361 168.11C86.7222 158.09 95.3934 149.5 105.8 149.5ZM237.707 49C298.833 49 351.462 73.2539 375.122 108.114C388.814 128.287 368.692 149.5 344.311 149.5H324.93C311.415 149.5 300.877 161.9 291.321 171.456C285.431 177.346 277.442 180.655 269.113 180.655C260.784 180.655 252.796 177.346 246.906 171.456C244.846 169.396 243.102 167.08 241.705 164.582C237.444 156.964 230.671 149.5 221.943 149.5C213.165 149.5 206.05 142.384 206.05 133.607V130.656C206.05 120.249 214.486 111.812 224.893 111.812H236.323C265.519 111.812 270.423 87.2141 241.231 86.7174C240.061 86.6975 238.886 86.6875 237.707 86.6875C204.334 86.6875 174.338 94.7204 153.643 107.496C149.377 110.129 144.543 111.812 139.53 111.812C121.272 111.812 111.581 92.546 126.324 81.776C153.892 61.6361 193.586 49 237.707 49Z" fill="url(#goldGrad)" fill-opacity="0.9"/>
+      <path d="M491.504 186.664C485.36 186.664 479.941 185.171 475.248 182.184C470.555 179.197 466.928 174.973 464.368 169.512C461.808 164.051 460.528 157.651 460.528 150.312C460.528 143.059 461.808 136.701 464.368 131.24C466.928 125.779 470.512 121.597 475.12 118.696C479.813 115.709 485.232 114.216 491.376 114.216C497.435 114.216 502.683 115.667 507.12 118.568C511.643 121.384 515.099 125.352 517.488 130.472C519.877 135.592 521.072 141.437 521.072 148.008V152.744H471.28V156.072C471.28 162.472 473.115 167.677 476.784 171.688C480.539 175.699 485.616 177.704 492.016 177.704C496.453 177.704 500.336 176.637 503.664 174.504C507.077 172.371 509.68 169.341 511.472 165.416L518.768 170.664C516.549 175.528 513.051 179.411 508.272 182.312C503.493 185.213 497.904 186.664 491.504 186.664ZM471.28 145.064H510.064V143.784C510.064 137.469 508.315 132.392 504.816 128.552C501.403 124.712 496.923 122.792 491.376 122.792C485.488 122.792 480.667 124.797 476.912 128.808C473.157 132.819 471.28 137.981 471.28 144.296V145.064ZM626.569 186.664C620.937 186.664 615.988 185.213 611.721 182.312C607.54 179.325 604.297 175.101 601.993 169.64C599.689 164.093 598.537 157.651 598.537 150.312C598.537 142.973 599.689 136.573 601.993 131.112C604.297 125.651 607.54 121.469 611.721 118.568C615.988 115.581 620.937 114.088 626.569 114.088C636.638 114.088 643.465 118.355 647.049 126.888H647.561V85.544H657.801V185H647.561V173.864H647.049C645.001 178.131 642.27 181.331 638.857 183.464C635.529 185.597 631.433 186.664 626.569 186.664ZM629.385 177.448C634.59 177.448 638.9 176.168 642.313 173.608C645.812 170.963 647.561 167.421 647.561 162.984V137C647.561 132.989 645.769 129.704 642.185 127.144C638.686 124.584 634.42 123.304 629.385 123.304C623.326 123.304 618.505 125.267 614.921 129.192C611.337 133.032 609.545 138.152 609.545 144.552V156.072C609.545 162.557 611.337 167.763 614.921 171.688C618.505 175.528 623.326 177.448 629.385 177.448ZM750.268 98.984C748.135 98.984 746.556 98.472 745.532 97.448C744.508 96.424 743.996 95.016 743.996 93.224V91.56C743.996 89.768 744.508 88.36 745.532 87.336C746.556 86.312 748.135 85.8 750.268 85.8C752.401 85.8 753.98 86.312 755.004 87.336C756.028 88.36 756.54 89.768 756.54 91.56V93.224C756.54 95.016 756.028 96.424 755.004 97.448C753.98 98.472 752.401 98.984 750.268 98.984ZM755.26 185H745.02V115.752H755.26V185ZM868.123 186.664C858.48 186.664 850.928 183.421 845.467 176.936C840.006 170.365 837.275 161.491 837.275 150.312C837.275 139.133 840.006 130.344 845.467 123.944C850.928 117.459 858.48 114.216 868.123 114.216C874.608 114.216 879.984 115.667 884.251 118.568C888.518 121.384 891.718 125.267 893.851 130.216L885.275 134.568C883.91 130.984 881.734 128.211 878.747 126.248C875.846 124.285 872.304 123.304 868.123 123.304C861.723 123.304 856.816 125.267 853.403 129.192C849.99 133.032 848.283 138.195 848.283 144.68V156.072C848.283 162.643 849.99 167.891 853.403 171.816C856.816 175.656 861.723 177.576 868.123 177.576C876.742 177.576 883.056 173.523 887.067 165.416L894.491 170.28C892.187 175.4 888.774 179.411 884.251 182.312C879.814 185.213 874.438 186.664 868.123 186.664ZM988.743 185C985.244 185 982.556 184.019 980.679 182.056C978.802 180.008 977.863 177.32 977.863 173.992V124.712H966.215V115.752H972.871C975.09 115.752 976.626 115.325 977.479 114.472C978.332 113.533 978.759 111.912 978.759 109.608V96.424H988.103V115.752H1003.34V124.712H988.103V176.04H1002.31V185H988.743ZM1085.02 185V115.752H1095.26V128.424H1095.9C1097.18 124.755 1099.49 121.725 1102.82 119.336C1106.23 116.947 1110.62 115.752 1116 115.752H1120.35V125.992H1113.95C1108.32 125.992 1103.8 127.101 1100.38 129.32C1096.97 131.539 1095.26 134.397 1095.26 137.896V185H1085.02ZM1215.18 186.664C1207.93 186.664 1202.26 184.787 1198.16 181.032C1194.15 177.277 1192.14 172.157 1192.14 165.672C1192.14 159.101 1194.58 154.109 1199.44 150.696C1204.3 147.197 1211.64 145.448 1221.46 145.448H1235.41V138.536C1235.41 133.416 1234 129.533 1231.18 126.888C1228.45 124.243 1224.31 122.92 1218.77 122.92C1211 122.92 1205.03 126.419 1200.85 133.416L1194.7 127.656C1196.75 123.645 1199.87 120.403 1204.05 117.928C1208.31 115.368 1213.39 114.088 1219.28 114.088C1227.56 114.088 1234 116.136 1238.61 120.232C1243.3 124.328 1245.65 130.045 1245.65 137.384V176.04H1253.58V185H1248.08C1241 185 1236.99 181.245 1236.05 173.736H1235.41C1233.96 177.917 1231.44 181.117 1227.86 183.336C1224.36 185.555 1220.13 186.664 1215.18 186.664ZM1216.98 177.96C1222.27 177.96 1226.66 176.723 1230.16 174.248C1233.66 171.688 1235.41 168.531 1235.41 164.776V153.128H1220.94C1214.89 153.128 1210.36 154.067 1207.38 155.944C1204.39 157.736 1202.9 160.381 1202.9 163.88V166.696C1202.9 170.28 1204.13 173.053 1206.61 175.016C1209.17 176.979 1212.62 177.96 1216.98 177.96ZM1356.69 186.664C1351.06 186.664 1346.11 185.213 1341.85 182.312C1337.66 179.325 1334.42 175.101 1332.12 169.64C1329.81 164.093 1328.66 157.651 1328.66 150.312C1328.66 142.973 1329.81 136.573 1332.12 131.112C1334.42 125.651 1337.66 121.469 1341.85 118.568C1346.11 115.581 1351.06 114.088 1356.69 114.088C1366.76 114.088 1373.59 118.355 1377.17 126.888H1377.69V85.544H1387.93V185H1377.69V173.864H1377.17C1375.13 178.131 1372.4 181.331 1368.98 183.464C1365.65 185.597 1361.56 186.664 1356.69 186.664ZM1359.51 177.448C1364.72 177.448 1369.02 176.168 1372.44 173.608C1375.94 170.963 1377.69 167.421 1377.69 162.984V137C1377.69 132.989 1375.89 129.704 1372.31 127.144C1368.81 124.584 1364.54 123.304 1359.51 123.304C1353.45 123.304 1348.63 125.267 1345.05 129.192C1341.46 133.032 1339.67 138.152 1339.67 144.552V156.072C1339.67 162.557 1341.46 167.763 1345.05 171.688C1348.63 175.528 1353.45 177.448 1359.51 177.448ZM1501.13 186.664C1494.99 186.664 1489.57 185.171 1484.87 182.184C1480.18 179.197 1476.55 174.973 1473.99 169.512C1471.43 164.051 1470.15 157.651 1470.15 150.312C1470.15 143.059 1471.43 136.701 1473.99 131.24C1476.55 125.779 1480.14 121.597 1484.75 118.696C1489.44 115.709 1494.86 114.216 1501 114.216C1507.06 114.216 1512.31 115.667 1516.75 118.568C1521.27 121.384 1524.72 125.352 1527.11 130.472C1529.5 135.592 1530.7 141.437 1530.7 148.008V152.744H1480.91V156.072C1480.91 162.472 1482.74 167.677 1486.41 171.688C1490.16 175.699 1495.24 177.704 1501.64 177.704C1506.08 177.704 1509.96 176.637 1513.29 174.504C1516.7 172.371 1519.31 169.341 1521.1 165.416L1528.39 170.664C1526.17 175.528 1522.68 179.411 1517.9 182.312C1513.12 185.213 1507.53 186.664 1501.13 186.664ZM1480.91 145.064H1519.69V143.784C1519.69 137.469 1517.94 132.392 1514.44 128.552C1511.03 124.712 1506.55 122.792 1501 122.792C1495.11 122.792 1490.29 124.797 1486.54 128.808C1482.78 132.819 1480.91 137.981 1480.91 144.296V145.064Z" fill="#DBA858"/>
+      <defs>
+        <linearGradient id="goldGrad" x1="379.565" y1="149.5" x2="88.9997" y2="149.5" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#E89C31"/>
+          <stop offset="1" stop-color="#DBA858"/>
+        </linearGradient>
+      </defs>
+    </svg>
+  </div>
+
+  <!-- Divider -->
+  <div class="divider">
+    <div class="divider-line"></div>
+    <div class="divider-diamond"></div>
+    <div class="divider-line"></div>
+  </div>
+
+  <!-- Main headline -->
+  <h1 class="headline">
+    <span class="accent">edict of trade</span> will be declared soon!
+  </h1>
+
+  <!-- Capability pills -->
+  <div class="data-row">
+    <div class="pill">AI-Powered Bots</div>
+    <div class="pill">Real-Time Analysis</div>
+    <div class="pill">Multi-Asset Trading</div>
+    <div class="pill">Quantitative Signals</div>
+  </div>
+
+  <!-- Sub message -->
+  <p class="sub">Intelligent trading infrastructure — loading</p>
+
+  <!-- Fake ticker -->
+  <div class="ticker-wrap">
+    <div class="ticker-tape" id="tape">
+      <span class="ticker-item"><span class="sym">BTC/USD</span><span class="val">67,420.50</span><span class="chg-up">+2.34%</span></span>
+      <span class="ticker-item"><span class="sym">ETH/USD</span><span class="val">3,518.80</span><span class="chg-up">+1.87%</span></span>
+      <span class="ticker-item"><span class="sym">S&amp;P 500</span><span class="val">5,248.80</span><span class="chg-up">+0.62%</span></span>
+      <span class="ticker-item"><span class="sym">GOLD</span><span class="val">2,336.40</span><span class="chg-up">+0.44%</span></span>
+      <span class="ticker-item"><span class="sym">EUR/USD</span><span class="val">1.0842</span><span class="chg-down">-0.18%</span></span>
+      <span class="ticker-item"><span class="sym">NASDAQ</span><span class="val">18,473.00</span><span class="chg-up">+0.91%</span></span>
+      <span class="ticker-item"><span class="sym">USD/JPY</span><span class="val">153.72</span><span class="chg-down">-0.29%</span></span>
+      <span class="ticker-item"><span class="sym">WTI</span><span class="val">78.54</span><span class="chg-up">+1.12%</span></span>
+      <!-- Duplicate for seamless loop -->
+      <span class="ticker-item"><span class="sym">BTC/USD</span><span class="val">67,420.50</span><span class="chg-up">+2.34%</span></span>
+      <span class="ticker-item"><span class="sym">ETH/USD</span><span class="val">3,518.80</span><span class="chg-up">+1.87%</span></span>
+      <span class="ticker-item"><span class="sym">S&amp;P 500</span><span class="val">5,248.80</span><span class="chg-up">+0.62%</span></span>
+      <span class="ticker-item"><span class="sym">GOLD</span><span class="val">2,336.40</span><span class="chg-up">+0.44%</span></span>
+      <span class="ticker-item"><span class="sym">EUR/USD</span><span class="val">1.0842</span><span class="chg-down">-0.18%</span></span>
+      <span class="ticker-item"><span class="sym">NASDAQ</span><span class="val">18,473.00</span><span class="chg-up">+0.91%</span></span>
+      <span class="ticker-item"><span class="sym">USD/JPY</span><span class="val">153.72</span><span class="chg-down">-0.29%</span></span>
+      <span class="ticker-item"><span class="sym">WTI</span><span class="val">78.54</span><span class="chg-up">+1.12%</span></span>
+    </div>
+  </div>
+
+  <!-- Domain -->
+  <p class="domain">edictrade.com</p>
+
+</div>
+</body>
+</html>
